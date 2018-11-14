@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Data_Structures.h"
 
+#include <iostream>
 //
 double Euclidean_Distance(double* v1, double* v2, int dim)
 {
@@ -94,30 +95,29 @@ Distance_Struct Distance_Matrix(double(*Distance_func)(double*, double*, int), d
 
 int Embedding_Dimension(Eigen::MatrixXd distance_matrix, int num_points, double** x)
 {
-	x = new double*[num_points];
+	for (int i = 0; i < num_points; i++)
+	{
+		x[i] = new double[num_points - 1];
+		for (int j = 0; j < (num_points - 1); j++)
+			x[i][j] = 0.0;
+	}
 
 	int dim = 1;
-	x[0] = new double[1];
-	x[1] = new double[1];
-	x[0][0] = 0.0;
 	x[1][0] = distance_matrix(0, 1);
-	for (int j_p = 2; j_p < num_points; j_p++)
+	for (int i_p = 2; i_p < num_points; i_p++)
 	{
-		for (int i_p = 0; i_p < j_p; i_p++)
+		double* a = Solver(x, dim + 1, distance_matrix.row(i_p));
+		if (isnan(a[dim]))
+			return INFINITY;
+		else 
 		{
-			double* a = Solver(x, dim + 1, distance_matrix.row(dim + 1));
-			if (isnan(a[dim]))
-				return INFINITY;
-			else
-			{
-				for (int i = 0; i < dim; i++)
-				{
-					x[i][dim] = 0.0;
-					x[dim + 1][i] = a[i];
-				}
+			for (int i_d = 0; i_d < (dim + 1); i_d++)
+				x[i_p][i_d] = a[i_d];
+
+			if (a[dim] > 0)
 				dim++;
-			}
 		}
+
 	}
 
 	return dim;
@@ -126,9 +126,12 @@ int Embedding_Dimension(Eigen::MatrixXd distance_matrix, int num_points, double*
 double* Solver(double** x, int dim, Eigen::VectorXd distance_vector)
 {
 
-	// "distance_vector" has (dim) elements containing the distance between the (dim + 1) point & the other (dim) points 
-	// "x" is (dim, dim) giving the coordinates of the (dim) points in the current dimension, (dim)
-	// So we have (dim) equations & (dim) unknown coordinates
+	// "distance_vector" has (num_points) elements containing the distance between the (dim) point & the other (dim - 1) points 
+	// "x" is (dim, dim-1) giving the coordinates of the (dim) points in the current dimension, (dim-1)
+	// So we have (dim-1) equations & (dim-1) unknown coordinates
+
+	double err = 1e-8; // Error Limit
+
 	double norm2_x_new = distance_vector[0] * distance_vector[0];
 	double* a = new double[dim];
 	for (int i = 0; i < (dim - 1); i++)
@@ -147,11 +150,14 @@ double* Solver(double** x, int dim, Eigen::VectorXd distance_vector)
 		if (abs(x[i][i - 1]) > 0)
 			a[i-1] = a[i-1] / x[i][i - 1];
 		else
+		{
 			break;
+		}
 
 		for (int j = (i + 1); j < dim; j++)
 		{
-			a[j-1] = (a[j-1] - x[j][i - 1] * a[i-1]) / x[i][i - 1];
+			a[j - 1] = a[j - 1] - x[j][i - 1] * a[i - 1];
+			//a[j - 1] = a[j - 1] - (x[j][i - 1] / x[i][i - 1]) * a[i - 1];
 		}
 	}
 
@@ -160,13 +166,21 @@ double* Solver(double** x, int dim, Eigen::VectorXd distance_vector)
 	{
 		norm2_a += a[i] * a[i];
 	}
-	if (norm2_x_new > norm2_a)
+
+
+	if (abs(norm2_x_new - norm2_a) < err)
+	{
+		a[dim - 1] = 0.0;
+	}
+	else if (norm2_x_new > norm2_a)
 	{
 		a[dim - 1] = sqrt(norm2_x_new - norm2_a);
-
 	}
 	else
+	{
 		a[dim - 1] = NAN;
+	}
 
 	return a;
 }
+
