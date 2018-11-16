@@ -9,10 +9,16 @@
 typedef Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> ArrayXXb;
 typedef Eigen::Array<bool, 1, Eigen::Dynamic> ArrayXb;
 
-struct Dendo_Slice
+class Dendo
 {
-	ArrayXb Slice;
-	double Scale;
+private:
+	int Num_Points;
+public:
+	bool** Structure;
+	double* Scale;
+
+	Dendo(int num_points);
+	~Dendo();
 };
 struct Distance_Index
 {

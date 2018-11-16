@@ -1,8 +1,30 @@
 #include "stdafx.h"
 #include "Data_Structures.h"
-
-#include <iostream>
 //
+Dendo::Dendo(int num_points)
+{
+	Num_Points = num_points;
+
+	Structure = new bool*[num_points];
+	Scale = new double[num_points];
+	for (int i = 0; i < num_points; i++)
+	{
+		Structure[i] = new bool[num_points];
+		for (int j = 0; j < num_points; j++)
+			Structure[i][j] = false;
+	} 
+}
+
+Dendo::~Dendo()
+{
+	delete[] Scale;
+	for (int i = 0; i < Num_Points; i++)
+	{
+		delete[] Structure[i];
+	}
+	delete [] Structure;
+}
+
 double Euclidean_Distance(double* v1, double* v2, int dim)
 {
 	double norm = 0;
@@ -157,7 +179,6 @@ double* Solver(double** x, int dim, Eigen::VectorXd distance_vector)
 		for (int j = (i + 1); j < dim; j++)
 		{
 			a[j - 1] = a[j - 1] - x[j][i - 1] * a[i - 1];
-			//a[j - 1] = a[j - 1] - (x[j][i - 1] / x[i][i - 1]) * a[i - 1];
 		}
 	}
 
