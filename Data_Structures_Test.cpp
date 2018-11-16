@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "Data_Structures.h"
+#include "Data_Structures_Test.h"
 
 #include <iostream>
 //
 
-int Embedding_Dimension_Test1()
+bool Embedding_Dimension_Test_1()
 {
 	int num_points = 4;
 	int dim = 2;
@@ -46,10 +47,10 @@ int Embedding_Dimension_Test1()
 	std::cout << Distances_New.Operator << std::endl;
 	std::cout << std::endl;
 
-	return Calculated_Dimension;
+	return (Calculated_Dimension == dim);
 }
 
-int Embedding_Dimension_Test2()
+bool Embedding_Dimension_Test_2()
 {
 	int num_points = 4;
 	int dim = 2;
@@ -109,12 +110,16 @@ int Embedding_Dimension_Test2()
 	std::cout << Distances_New.Operator << std::endl;
 	std::cout << std::endl;
 
-	return Calculated_Dimension;
+	return (Calculated_Dimension == dim);
 }
 
-int Embedding_Dimension_Test3(int num_points)
+bool Embedding_Dimension_Test_3()
 {
-	int dim = 2;
+	return Embedding_Dimension_Test_3(12);
+}
+bool Embedding_Dimension_Test_3(int num_points)
+{
+	int dim = 3;
 	double** p = new double*[num_points];
 	for (int i = 0; i < num_points; i++)
 	{
@@ -162,5 +167,14 @@ int Embedding_Dimension_Test3(int num_points)
 	std::cout << Distances_New.Operator << std::endl;
 	std::cout << std::endl;
 
-	return Calculated_Dimension;
+	return (Calculated_Dimension == dim);
+}
+
+bool Embedding_Dimension_Test_All()
+{
+	bool result_1 = Embedding_Dimension_Test_1();
+	bool result_2 = Embedding_Dimension_Test_2();
+	bool result_3 = Embedding_Dimension_Test_3();
+
+	return (result_1 & result_2 & result_3);
 }
