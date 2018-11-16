@@ -2,6 +2,8 @@
 #include "Eigen/Dense"
 #include "Clusters.h"
 
+#include <iostream>
+
 using namespace Eigen;
 
 Clusters::Clusters(Distance_Struct Distances)
@@ -10,19 +12,17 @@ Clusters::Clusters(Distance_Struct Distances)
 	Orthogonal_Transformation_Dual = MatrixXd::Constant(Distances.Number_Points, Distances.Number_Points, 1 / sqrt(Distances.Number_Points)); // Output
 
 	// Defining the Boolean Dendogram
-	Dendogram = new Dendo_Slice[Distances.Number_Points];
-	Dendogram_Dual = new Dendo_Slice[Distances.Number_Points];
+	Dendogram = new Dendo(Distances.Number_Points);
+	Dendogram_Dual = new Dendo(Distances.Number_Points);
+
 	// Initializing the base of the Dendogram
-	Dendogram[0].Slice = ArrayXb::Constant(Distances.Number_Points, false);
-	Dendogram[0].Scale = 0;
-	Dendogram_Dual[0].Slice = ArrayXb::Constant(Distances.Number_Points, false);
-	Dendogram_Dual[0].Scale = Infinity;
+	Dendogram->Scale[0] = 0;
+	Dendogram_Dual->Scale[0] = Infinity;
 
 	Hierarchical(Distances);
 
-	Max_Vacuum_Scales = Dendogram[Distances.Number_Points - 1].Scale;
-	Min_Saturation_Scales = Dendogram_Dual[Distances.Number_Points - 1].Scale;
-
+	Max_Vacuum_Scale = Dendogram->Scale[Distances.Number_Points - 1];
+	Min_Saturation_Scale = Dendogram_Dual->Scale[Distances.Number_Points - 1];
 }
 
 void Clusters::Hierarchical(Distance_Struct Distances)
@@ -61,8 +61,12 @@ void Clusters::Hierarchical(Distance_Struct Distances)
 
 			// *** Dendogram Assignment
 			ArrayXb this_Cluster_State = Clusters_State[Distances.Vector[i_pairs].Index1] || Clusters_State[Distances.Vector[i_pairs].Index2];
-			Dendogram[cluster_counter].Slice = this_Cluster_State;
-			Dendogram[cluster_counter].Scale = Distances.Vector[i_pairs].Distance;
+			
+			for (int i_points = 0; i_points < Distances.Number_Points; i_points++)
+			{				 
+				Dendogram->Structure[cluster_counter][i_points] = this_Cluster_State(i_points);
+			}
+			Dendogram->Scale[cluster_counter] = Distances.Vector[i_pairs].Distance;
 			// ***
 			for (int i_points = 0; i_points < Distances.Number_Points; i_points++)
 			{
@@ -101,8 +105,11 @@ void Clusters::Hierarchical(Distance_Struct Distances)
 
 			// *** Dendogram Assignment
 			ArrayXb this_Cluster_State = Clusters_State[Distances.Vector[i_pairs].Index1] || Clusters_State[Distances.Vector[i_pairs].Index2];
-			Dendogram_Dual[cluster_counter].Slice = this_Cluster_State;
-			Dendogram_Dual[cluster_counter].Scale = Distances.Vector[i_pairs].Distance;
+			for (int i_points = 0; i_points < Distances.Number_Points; i_points++)
+			{
+				Dendogram_Dual->Structure[cluster_counter][i_points] = this_Cluster_State(i_points);
+			}
+			Dendogram_Dual->Scale[cluster_counter] = Distances.Vector[i_pairs].Distance;
 			// ***
 			for (int i_points = 0; i_points < Distances.Number_Points; i_points++)
 			{
@@ -117,8 +124,8 @@ void Clusters::Hierarchical(Distance_Struct Distances)
 	}
 }
 
-Clusters::~Clusters()
+Clusters::~Clusters() 
 {
-	delete[] Dendogram;
-	delete[] Dendogram_Dual;
+	delete Dendogram;
+	delete Dendogram_Dual;
 }

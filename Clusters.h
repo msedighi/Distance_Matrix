@@ -12,11 +12,11 @@ private:
 public:
 	Eigen::MatrixXd Orthogonal_Transformation;
 	Eigen::MatrixXd Orthogonal_Transformation_Dual;
-	Dendo_Slice * Dendogram;
-	Dendo_Slice * Dendogram_Dual;
-	double Max_Vacuum_Scales;
-	double Min_Saturation_Scales;
-		
+	Dendo * Dendogram;
+	Dendo * Dendogram_Dual;
+	double Max_Vacuum_Scale;
+	double Min_Saturation_Scale;
+
 	Clusters(Distance_Struct Distances);
 	~Clusters();
 };
