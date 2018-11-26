@@ -205,3 +205,28 @@ double* Solver(double** x, int dim, Eigen::VectorXd distance_vector)
 	return a;
 }
 
+double StepFunc_1(double scale, double x)
+{
+	double out;
+	if (scale >= 1)
+		out = 1;
+	else
+	{
+		if (x <= (1 - scale))
+			out = x * scale / (1 - scale);
+		else
+			out = x * (1 - scale) / scale + (2 * scale - 1) / scale;
+	}
+	return out;
+}
+
+double StepFunc_2(double scale, double x)
+{
+	double out;
+	if ((scale > 0.5) && (x > ((1 - scale) / scale)))
+		out = 1.0;
+	else
+		out = x * scale / (1 - scale);
+
+	return out;
+}

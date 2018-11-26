@@ -67,3 +67,7 @@ Distance_Struct Distance_Matrix(double(*Distance_func)(double*, double*, int), d
 int Embedding_Dimension(Eigen::MatrixXd distance_matrix, int num_points, double** x);
 
 double* Solver(double** x, int dim, Eigen::VectorXd distance_vector);
+
+double StepFunc_1(double scale, double x);
+
+double StepFunc_2(double scale, double x);
