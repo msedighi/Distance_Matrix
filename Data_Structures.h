@@ -68,6 +68,8 @@ int Embedding_Dimension(Eigen::MatrixXd distance_matrix, int num_points, double*
 
 double* Solver(double** x, int dim, Eigen::VectorXd distance_vector);
 
+double StepFunc_0(double scale, double x);
 double StepFunc_1(double scale, double x);
-
 double StepFunc_2(double scale, double x);
+double StepFunc_3(double scale, double x);
+double StepFunc_32(double scale, double x);
