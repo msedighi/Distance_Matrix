@@ -73,3 +73,4 @@ double StepFunc_1(double scale, double x);
 double StepFunc_2(double scale, double x);
 double StepFunc_3(double scale, double x);
 double StepFunc_32(double scale, double x);
+double StepFunc_4(double scale, double x);

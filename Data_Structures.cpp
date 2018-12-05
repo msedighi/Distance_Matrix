@@ -268,4 +268,19 @@ double StepFunc_32(double scale, double x)
 	return out;
 }
 
+double StepFunc_4(double scale, double x)
+{
+	double out;
+	if ((scale == 1) || (scale == 0))
+		out = scale;
+	else
+	{
+		if (scale <= 0.5)
+			out = -(1 - x) * (1 - scale) / scale + sqrt( (1 - x) * (1 - x) * ((1 - scale) * (1 - scale) / (scale * scale) - 1) + 1 );
+		else
+			out = 1 + x * scale / (1 - scale) - sqrt( x * x * (scale * scale / (1 - scale) / (1 - scale) - 1) + 1);
+	}
+	return out;
+}
+
 
