@@ -195,11 +195,11 @@ double* Solver(double** x, int dim, Eigen::VectorXd distance_vector)
 	}
 	else if (norm2_x_new > norm2_a)
 	{
-		a[dim - 1] = sqrt(norm2_x_new - norm2_a);
+	a[dim - 1] = sqrt(norm2_x_new - norm2_a);
 	}
 	else
 	{
-		a[dim - 1] = NAN;
+	a[dim - 1] = NAN;
 	}
 
 	return a;
@@ -207,7 +207,7 @@ double* Solver(double** x, int dim, Eigen::VectorXd distance_vector)
 
 double StepFunc_0(double scale, double x)
 {
-	double out = (double)(x <= scale);
+	double out = (double)(x >= scale);
 	return out;
 }
 
@@ -257,6 +257,21 @@ double StepFunc_3(double scale, double x)
 	return out;
 }
 
+double StepFunc_4(double scale, double x)
+{
+	double out;
+	if ((scale == 1) || (scale == 0))
+		out = scale;
+	else
+	{
+		if (scale <= 0.5)
+			out = -(1 - x) * (1 - scale) / scale + sqrt((1 - x) * (1 - x) * ((1 - scale) * (1 - scale) / (scale * scale) - 1) + 1);
+		else
+			out = 1 + x * scale / (1 - scale) - sqrt(x * x * (scale * scale / (1 - scale) / (1 - scale) - 1) + 1);
+	}
+	return out;
+}
+
 double StepFunc_32(double scale, double x)
 {
 	double out;
@@ -268,19 +283,67 @@ double StepFunc_32(double scale, double x)
 	return out;
 }
 
-double StepFunc_4(double scale, double x)
+Multiplicity Compute_Multiplicity(Eigen::VectorXd energy_vector, int num_points, double err)
 {
-	double out;
-	if ((scale == 1) || (scale == 0))
-		out = scale;
-	else
+
+	Multiplicity M;
+	int* initial_ind = new int[num_points];
+	int* final_ind = new int[num_points];
+	int* nondeg_ind = new int[num_points];
+	if (abs(energy_vector(0) - energy_vector(1)) < err) // This is the Initial Index
 	{
-		if (scale <= 0.5)
-			out = -(1 - x) * (1 - scale) / scale + sqrt( (1 - x) * (1 - x) * ((1 - scale) * (1 - scale) / (scale * scale) - 1) + 1 );
-		else
-			out = 1 + x * scale / (1 - scale) - sqrt( x * x * (scale * scale / (1 - scale) / (1 - scale) - 1) + 1);
+		M.Num_Degenerate_States++;
+		initial_ind[M.Num_Degenerate_States - 1] = 0;
 	}
-	return out;
+	else // This is a Non-Degenerate Index 
+	{
+		M.Num_NonDegenerate_States++;
+		nondeg_ind[M.Num_NonDegenerate_States - 1] = 0;
+	}
+	for (int i = 1; i < (num_points - 1); i++)
+	{
+		if ((abs(energy_vector(i) - energy_vector(i - 1)) > err) && (abs(energy_vector(i) - energy_vector(i + 1)) < err)) // This is the Initial Index 
+		{
+			M.Num_Degenerate_States++;
+			initial_ind[M.Num_Degenerate_States - 1] = i;
+		}
+		else
+		{
+			if ((abs(energy_vector(i) - energy_vector(i - 1)) < err) && (abs(energy_vector(i) - energy_vector(i + 1)) > err)) // This is the Final Index 
+			{
+				final_ind[M.Num_Degenerate_States - 1] = i;
+			}
+			else if ((abs(energy_vector(i) - energy_vector(i - 1)) > err) && (abs(energy_vector(i) - energy_vector(i + 1)) > err)) // This is a Non-Degenerate Index 
+			{
+				M.Num_NonDegenerate_States++;
+				nondeg_ind[M.Num_NonDegenerate_States - 1] = i;
+			}
+		}
+	}
+	if (abs(energy_vector(num_points - 1) - energy_vector(num_points - 2)) < err) // This is the Final Index 
+	{
+		final_ind[M.Num_Degenerate_States - 1] = num_points - 1;
+	}
+	else // This is a Non-Degenerate Index 
+	{
+		M.Num_NonDegenerate_States++;
+		nondeg_ind[M.Num_NonDegenerate_States - 1] = num_points - 1;
+	}
+
+	M.initial_index = new int[M.Num_Degenerate_States];
+	M.final_index = new int[M.Num_Degenerate_States];
+	M.degeneracy = new int[M.Num_Degenerate_States];
+	for (int i_d = 0; i_d < M.Num_Degenerate_States; i_d++)
+	{
+		M.initial_index[i_d] = initial_ind[i_d];
+		M.final_index[i_d] = final_ind[i_d];
+		M.degeneracy[i_d] = final_ind[i_d] - initial_ind[i_d] + 1;
+	}
+
+	M.nondegenerate_index = new int[M.Num_NonDegenerate_States];
+	for (int i_nd = 0; i_nd < M.Num_NonDegenerate_States; i_nd++)
+		M.nondegenerate_index[i_nd] = nondeg_ind[i_nd];
+
+
+	return M;
 }
-
-

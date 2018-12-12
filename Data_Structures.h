@@ -68,9 +68,22 @@ int Embedding_Dimension(Eigen::MatrixXd distance_matrix, int num_points, double*
 
 double* Solver(double** x, int dim, Eigen::VectorXd distance_vector);
 
-double StepFunc_0(double scale, double x);
-double StepFunc_1(double scale, double x);
-double StepFunc_2(double scale, double x);
-double StepFunc_3(double scale, double x);
+double StepFunc_0(double scale, double x); // Original Step Function
+double StepFunc_1(double scale, double x); // 2 Lines
+double StepFunc_2(double scale, double x); // Constant + Line 
+double StepFunc_3(double scale, double x); // Linear
+double StepFunc_4(double scale, double x); // Heyperbolic 
+
 double StepFunc_32(double scale, double x);
-double StepFunc_4(double scale, double x);
+
+struct Multiplicity
+{
+	int Num_Degenerate_States = 0;
+	int* initial_index;
+	int* final_index;
+	int* degeneracy;
+
+	int Num_NonDegenerate_States = 0;
+	int* nondegenerate_index;
+};
+Multiplicity Compute_Multiplicity(Eigen::VectorXd energy_vector, int num_points, double err);
