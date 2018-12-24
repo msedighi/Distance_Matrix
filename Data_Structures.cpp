@@ -285,6 +285,7 @@ double StepFunc_32(double scale, double x)
 
 Multiplicity Compute_Multiplicity(Eigen::VectorXd energy_vector, int num_points, double err)
 {
+	// * This function assumes that "energy_vector" is sorted *
 
 	Multiplicity M;
 	int* initial_ind = new int[num_points];
